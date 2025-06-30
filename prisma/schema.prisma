@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text  // Texto longo
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  // Relações (chaves estrangeiras)
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+  ticketId Int     @map("ticket_id")
+  
+  user     User?   @relation(fields: [userId], references: [id])  // Opcional: se quiser vincular ao autor
+  userId   Int?    @map("user_id")
+  
+  // Mapeia nomes de colunas para snake_case (opcional)
+  @@map("comments")
+}
+
+model Ticket {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  status      String    @default("OPEN")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  comments    Comment[]  // Relação "um para muitos" com Comment
+  @@map("tickets")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  password String
+  role     String?
+  comments  Comment[]  // ← Relação inversa adicionada
+  @@map("users")
+}
