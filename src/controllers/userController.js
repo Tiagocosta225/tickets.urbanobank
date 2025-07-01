@@ -45,19 +45,54 @@ module.exports.getAllUsers = (req, res) => {
 
 exports.updateUser = (req, res) => {
   try {
-    // Sua lógica aqui
     res.status(200).json({ message: "Update de usuário" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-exports.deleteUser = (req, res) => {
+exports.deleteUser = async (req, res) => {
   try {
-    // Sua lógica aqui
-    res.status(200).json({ message: "Delete User" });
+    const { id } = req.params;
+    
+    // Verifica se o usuário existe
+    const user = await prisma.user.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    // Tenta deletar
+    const deletedUser = await prisma.user.delete({
+      where: { id: Number(id) }
+    });
+
+    console.log('Usuário deletado com sucesso');
+    return res.status(200).json({
+      message: "Usuário deletado",
+      deletedUser: { 
+        id: deletedUser.id,
+        email: deletedUser.email
+      }
+    });
+    
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Erro ao deletar:', error);
+    
+    // Tratamento específico para constraints
+    if (error.code === 'P2003') {
+      return res.status(400).json({ 
+        error: "Não é possível deletar: usuário possui registros relacionados",
+        solution: "Delete os comentários primeiro ou altere as constraints do banco"
+      });
+    }
+    
+    return res.status(500).json({ 
+      error: "Erro interno ao deletar usuário",
+      details: error.message
+    });
   }
 }
 
