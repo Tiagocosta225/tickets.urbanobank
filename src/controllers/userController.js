@@ -43,11 +43,41 @@ module.exports.getAllUsers = (req, res) => {
   }
 };
 
-exports.updateUser = (req, res) => {
+exports.updateUser = async (req, res) => {
   try {
-    res.status(200).json({ message: "Update de usuário" });
+    const { id } = req.params; // Obtém o ID da URL
+    const updateData = req.body; // Dados de atualização
+
+    // Validação básica
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    // Verifica se o usuário existe
+    const userExists = await prisma.user.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!userExists) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    // Atualiza o usuário
+    const updatedUser = await prisma.user.update({
+      where: { id: Number(id) }, // Especifica o ID do usuário a ser atualizado
+      data: updateData
+    });
+
+    // Remove a senha da resposta
+    const { password: _, ...userData } = updatedUser;
+    return res.status(200).json(userData);
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Erro ao atualizar usuário:', error);
+    return res.status(500).json({ 
+      error: "Erro ao atualizar usuário",
+      details: error.message
+    });
   }
 }
 
