@@ -1,8 +1,5 @@
+const prisma = require('../prisma');
 
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
-// src/controllers/ticketController.js
 exports.createTicket = async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -21,49 +18,79 @@ exports.createTicket = async (req, res) => {
   }
 };
 
-
-exports.getAllTickets = (req, res) => {
+exports.getAllTickets = async (req, res) => {
   try {
-    // Sua lógica aqui
-    res.status(200).json({ message: "Lista de tickets" });
+    const tickets = await prisma.ticket.findMany();
+    res.status(200).json(tickets);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-exports.getTicketById = (req, res) => {
+exports.getTicketById = async (req, res) => {
   try {
-    // Sua lógica aqui
-    res.status(200).json({ message: "Lista de tickets por Id" });
+    const ticket = await prisma.ticket.findUnique({
+      where: { id: Number(req.params.id) }
+    });
+    res.status(200).json(ticket);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-exports.updateTicket = (req, res) => {
+exports.updateTicket = async (req, res) => {
   try {
-    // Sua lógica aqui
-    res.status(200).json({ message: "Update de ticket" });
+    const updatedTicket = await prisma.ticket.update({
+      where: { id: Number(req.params.id) },
+      data: req.body
+    });
+    res.status(200).json(updatedTicket);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 
-exports.deleteTicket = (req, res) => {
+exports.deleteTicket = async (req, res) => {
   try {
-    // Sua lógica aqui
-    res.status(200).json({ message: "Delete ticket" });
+    const { id } = req.params;
+    
+    const ticket = await prisma.ticket.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket não encontrado" });
+    }
+
+    await prisma.ticket.delete({
+      where: { id: Number(id) }
+    });
+
+    return res.status(200).json({
+      message: "Ticket deletado",
+      deletedTicket: { 
+        id: ticket.id,
+        title: ticket.title
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao deletar ticket:', error);
+    return res.status(500).json({ error: "Erro ao deletar ticket" });
+  }
+};
+
+exports.addComment = async (req, res) => {
+  try {
+    const { content } = req.body;
+    const newComment = await prisma.comment.create({
+      data: {
+        content,
+        ticketId: Number(req.params.id),
+        userId: req.userId
+      }
+    });
+    res.status(201).json(newComment);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
-
-exports.addComment = (req, res) => {
-  try {
-    // Sua lógica aqui
-    res.status(200).json({ message: "Comentário adicionado" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-
+};

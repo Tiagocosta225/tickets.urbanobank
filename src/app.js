@@ -12,3 +12,9 @@ app.use('/auth', authRouter);
 app.listen(3000, () => {
   console.log('Server running on port 3000');
 });
+
+process.on('SIGTERM', () => {
+  server.close(() => {
+    console.log('Process terminated');
+  });
+});

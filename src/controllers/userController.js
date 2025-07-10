@@ -1,7 +1,6 @@
 // src/controllers/userController.js
 const getUserList = () => [{ id: 1, name: "Test User" }];
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../prisma');
 
 exports.createUser = async (req, res) => {
     try {
