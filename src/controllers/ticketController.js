@@ -1,10 +1,23 @@
+
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
 // src/controllers/ticketController.js
 exports.createTicket = async (req, res) => {
   try {
-    // Sua lógica aqui
-    res.status(201).json({ message: "Ticket criado!" });
+    const { title, description } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ error: "Título é obrigatório" });
+    }
+
+    const newTicket = await prisma.ticket.create({
+      data: { title, description }
+    });
+
+    res.status(201).json(newTicket);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Erro ao criar ticket" });
   }
 };
 
