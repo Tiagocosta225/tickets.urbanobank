@@ -20,7 +20,7 @@ model Comment {
   createdAt DateTime @default(now()) @map("created_at")
   
   // Relações (chaves estrangeiras)
-  ticket   Ticket @relation(fields: [ticketId], references: [id])
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   ticketId Int     @map("ticket_id")
   
   user     User?   @relation(fields: [userId], references: [id])  // Opcional: se quiser vincular ao autor
@@ -36,7 +36,7 @@ model Ticket {
   description String?
   status      String    @default("OPEN")
   createdAt   DateTime  @default(now()) @map("created_at")
-  comments    Comment[]  // Relação "um para muitos" com Comment
+  comments    Comment[]
   @@map("tickets")
 }
 

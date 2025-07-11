@@ -74,8 +74,11 @@ exports.deleteTicket = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Erro ao deletar ticket:', error);
-    return res.status(500).json({ error: "Erro ao deletar ticket" });
+    console.error('Erro detalhado:', error);
+    return res.status(500).json({ 
+      error: "Falha ao deletar ticket",
+      details: error.message // Mostra o erro real
+    });
   }
 };
 

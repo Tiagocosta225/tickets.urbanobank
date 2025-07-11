@@ -10,7 +10,7 @@ router.get('/', ticketController.getAllTickets);
 router.post('/', authMiddleware, ticketController.createTicket);
 router.get('/:id', ticketController.getTicketById);
 router.put('/:id', ticketController.updateTicket);
-router.delete('/:id', ticketController.deleteTicket);
+router.delete('/:id', authMiddleware, ticketController.deleteTicket);
 router.post('/:id/comments', ticketController.addComment);
 
 module.exports = router;
