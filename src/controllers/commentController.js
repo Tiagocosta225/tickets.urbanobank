@@ -1,32 +1,27 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+const prisma = require('../prisma');
 
 // Adicionar comentário a um chamado
-export const addComment = async (req, res) => {
-  const { ticketId } = req.params;
-  const { content, userId } = req.body;
-
+// Usando CommonJS (recomendado para Node.js)
+exports.addComment = async (req, res) => {
   try {
-    // Verifica se o ticket existe
-    const ticket = await prisma.ticket.findUnique({
-      where: { id: Number(ticketId) },
-    });
-
-    if (!ticket) {
-      return res.status(404).json({ error: 'Chamado não encontrado' });
+    const { content } = req.body;
+    const { ticketId } = req.params;
+    
+    if (!content) {
+      return res.status(400).json({ error: "Conteúdo é obrigatório" });
     }
 
-    // Cria o comentário
-    const comment = await prisma.comment.create({
+    const newComment = await prisma.comment.create({
       data: {
         content,
         ticketId: Number(ticketId),
-        userId: Number(userId),
-      },
+        userId: req.user.id // Assumindo que o auth middleware adiciona isso
+      }
     });
 
-    res.status(201).json(comment);
+    res.status(201).json(newComment);
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao adicionar comentário' });
+    console.error('Erro ao criar comentário:', error);
+    res.status(500).json({ error: "Erro no servidor" });
   }
 };

@@ -1,9 +1,10 @@
-import express from 'express';
-import { addComment } from '../controllers/commentController.js';
-
+const express = require('express');
 const router = express.Router();
+const commentController = require('../controllers/commentController');
 
-// POST /tickets/:ticketId/comments
-router.post('/tickets/:ticketId/comments', addComment);
+// Verificação de debug
+console.log('addComment é função?', typeof commentController.addComment === 'function');
 
-export default router;
+router.post('/tickets/:ticketId/comments', commentController.addComment);
+
+module.exports = router;
