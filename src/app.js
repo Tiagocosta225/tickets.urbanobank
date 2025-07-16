@@ -10,6 +10,7 @@ app.use('/users', usersRouter);
 app.use('/tickets', ticketsRouter);
 app.use('/auth', authRouter);
 app.use('/api', commentsRouter);
+app.use('/tickets', commentsRouter);
 
 app.listen(3000, () => {
   console.log('Server running on port 3000');
